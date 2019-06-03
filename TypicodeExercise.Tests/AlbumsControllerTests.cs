@@ -49,14 +49,14 @@ namespace TypicodeExercise.Tests
         }
 
         [TestMethod]
-        public void Get_NoAlbumsFound_ReturnsNotFoundResponse()
+        public void Get_NoAlbumsFound_ReturnsInternalServerError()
         {
             var mockClient = new Mock<ITypicodeClient>();
             mockClient.Setup(client => client.GetAlbumsAsync()).Returns(Task.FromResult<List<Album>>(null));
             var controller = new AlbumsController(mockClient.Object);
 
             var actionResult = controller.Get().GetAwaiter().GetResult();
-            var contentResult = actionResult as NotFoundResult;
+            var contentResult = actionResult as ExceptionResult;
 
             contentResult.Should().NotBeNull();
         }
@@ -135,7 +135,7 @@ namespace TypicodeExercise.Tests
         }
 
         [TestMethod]
-        public void Get_WhenPhotosButNoAlbums_ReturnsNotFound()
+        public void Get_WhenPhotosButNoAlbums_ReturnsInternalServerError()
         {
             var mockClient = new Mock<ITypicodeClient>();
             mockClient.Setup(client => client.GetAlbumsAsync()).Returns(Task.FromResult<List<Album>>(null));
@@ -143,24 +143,13 @@ namespace TypicodeExercise.Tests
             var controller = new AlbumsController(mockClient.Object);
 
             var actionResult = controller.Get().GetAwaiter().GetResult();
-            var contentResult = actionResult as NotFoundResult;
+            var contentResult = actionResult as ExceptionResult;
 
             contentResult.Should().NotBeNull();
         }
         #endregion
 
         #region GetByUserId
-        [TestMethod]
-        public void GetByUserId_ResponseNotNull()
-        {
-            var mockClient = new Mock<ITypicodeClient>();
-            var controller = new AlbumsController(mockClient.Object);
-
-            var result = controller.Get(0).GetAwaiter().GetResult();
-
-            result.Should().NotBeNull();
-        }
-
         [TestMethod]
         public void GetByUserId_UserIdNotValid_ReturnsBadRequest()
         {
@@ -172,6 +161,7 @@ namespace TypicodeExercise.Tests
 
             contentResult.Should().NotBeNull();
         }
+
         [TestMethod]
         public void GetByUserId_AlbumsFound_ReturnsSuccessResponse()
         {
@@ -186,16 +176,19 @@ namespace TypicodeExercise.Tests
         }
 
         [TestMethod]
-        public void GetByUserId_NoAlbumsFound_ReturnsNotFoundResponse()
+        public void GetByUserId_NoAlbumsFound_ReturnsEmptyList()
         {
             var mockClient = new Mock<ITypicodeClient>();
-            mockClient.Setup(client => client.GetAlbumsByUserIdAsync(It.IsAny<int>())).Throws(new Exception("404 (Not Found)"));
+            mockClient.Setup(client => client.GetAlbumsByUserIdAsync(It.IsAny<int>())).Returns(Task.FromResult(new List<Album>()));
             var controller = new AlbumsController(mockClient.Object);
 
             var actionResult = controller.Get(1).GetAwaiter().GetResult();
-            var contentResult = actionResult as NotFoundResult;
+            var contentResult = actionResult as OkNegotiatedContentResult<List<Album>>;
 
             contentResult.Should().NotBeNull();
+            var albums = contentResult.Content as List<Album>;
+            albums.Should().NotBeNull();
+            albums.Count.Should().Be(0);
         }
 
         [TestMethod]

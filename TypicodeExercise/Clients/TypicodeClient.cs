@@ -42,7 +42,7 @@ namespace TypicodeExercise.Clients
 
         public async Task<List<Album>> GetAlbumsByUserIdAsync(int userId)
         {
-            return await GetResourceAsync<List<Album>>($"albums/userId={userId}");
+            return await GetResourceAsync<List<Album>>($"albums?userId={userId}");
         }
 
         public async Task<List<Photo>> GetPhotosAsync()
@@ -52,7 +52,7 @@ namespace TypicodeExercise.Clients
 
         public async Task<List<Photo>> GetPhotosByAlbumIdAsync(int albumId)
         {
-            return await GetResourceAsync<List<Photo>>($"photos/albumId={albumId}");
+            return await GetResourceAsync<List<Photo>>($"photos?albumId={albumId}");
         }
 
         private async Task<T> GetResourceAsync<T>(string url)
